@@ -9,12 +9,10 @@ void fill_circle(SDL_Renderer *renderer, double x, double y, double rad, double 
 void project_point(Vec3 point, Vec3 viewPoint, Plane projectionPlane, double& ret_x, double& ret_y);
 
 class Drawable {
-	public:
+	private:
 	int priority;
-
-	Drawable(int p){
-		priority = 100;
-	}
+	public:
+	Drawable(int p) : priority{p} {}
 	virtual void draw([[ maybe_unused ]]SDL_Renderer *renderer){
 		return;
 	}
@@ -26,6 +24,9 @@ class Drawable {
 		rect.y = 0;
 		rect.w = WINWID;
 		rect.h = WINHEI;
+	}
+	virtual int get_priority(void) final {
+		return priority;
 	}
 
 };

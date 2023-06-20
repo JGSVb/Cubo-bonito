@@ -97,14 +97,19 @@ void Slider::draw(SDL_Renderer *renderer){
 }
 
 void Slider::process_event(SDL_Event *ev){
-	if(ev->type != SDL_MOUSEWHEEL){
+	if(ev->type == SDL_MOUSEBUTTONUP){
+		if(ev->button.button == SDL_BUTTON_LEFT && ev->button.clicks == 2){
+			this->return_to_default();
+		}
 		return;
 	}
 
-	if(ev->wheel.y > 0){
-		this->increase();
-	} else if(ev->wheel.y < 0){
-		this->decrease();
+	if(ev->type == SDL_MOUSEWHEEL){
+		if(ev->wheel.y > 0){
+			this->increase();
+		} else if(ev->wheel.y < 0){
+			this->decrease();
+		}
 	}
 }
 

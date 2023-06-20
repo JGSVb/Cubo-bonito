@@ -13,6 +13,8 @@ class Slider: virtual public Drawable{
 	SDL_Texture *labelTexture;
 	SDL_Texture *valueTexture;
 	double actualVal;
+	double defaultVal;
+	double *linkPointer;
 	double minVal;
 	double maxVal;
 	int xPosition;
@@ -25,8 +27,7 @@ class Slider: virtual public Drawable{
 	public:
 	double increment;
 
-	Slider(SDL_Renderer *render, std::string lbl){
-		Drawable();
+	Slider(SDL_Renderer *render, std::string lbl) : Drawable { -100 } {
 		renderer = render;
 		label = lbl;
 		actualVal = 0;
@@ -35,15 +36,30 @@ class Slider: virtual public Drawable{
 		increment = 10;
 		xPosition = 0;
 		yPosition = 0;
+		defaultVal = 0;
 
 		labelTexture = NULL;
 		valueTexture = NULL;
+
+		linkPointer = NULL;
 
 		update();
 	}
 
 	~Slider(void){
 		dispose();
+	}
+
+	void return_to_default(void){
+		set_value(defaultVal);
+	}
+
+	void set_default(double d){
+		defaultVal = d;
+		set_value(d);
+	}
+	double get_default(void){
+		return defaultVal;
 	}
 
 	void set_position(int x, int y){
@@ -62,11 +78,20 @@ class Slider: virtual public Drawable{
 		val = std::max(val, minVal);
 		val = std::min(val, maxVal);
 		actualVal = val;
+		if(linkPointer){
+			*linkPointer = val;
+		}
 		// aquando duma alteração no valor, há uma atualização na componente gráfica
 		update();
 	}
 	double get_value(void){
 		return actualVal;
+	}
+	void set_increment(double i){
+		increment = i;
+	}
+	double get_increment(void){
+		return increment;
 	}
 
 	void increase(void){
@@ -85,6 +110,13 @@ class Slider: virtual public Drawable{
 	void get_boundries(double &min, double &max){
 		min = minVal;
 		max = maxVal;
+	}
+	void link(double *ptr){
+		linkPointer = ptr;
+		*linkPointer = actualVal;
+	}
+	void unlink(void){
+		linkPointer = NULL;
 	}
 
 	void get_label_rect(SDL_Rect &rect);

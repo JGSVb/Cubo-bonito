@@ -100,7 +100,16 @@ namespace graphics {
 	}
 
 	void register_drawable(Drawable *s){
-		G_app.registeredDrawables.push_back(s);
+		std::vector<Drawable*>::iterator it;
+		for(it = G_app.registeredDrawables.begin(); it != G_app.registeredDrawables.end(); it++){
+			if((*it)->get_priority() <= s->get_priority()){
+				G_app.registeredDrawables.insert(it, s);
+				return; // sai da função, para que possa, posterior-
+					// mente, ser adicionado, conforme escrito
+					// abaixo \/ 
+			}
+		}
+		G_app.registeredDrawables.insert(G_app.registeredDrawables.begin(), s);
 	}
 	void unregister_drawable(Drawable *s){
 		std::vector<Drawable*>::iterator it;
@@ -123,6 +132,9 @@ namespace graphics {
 		SDL_GetMouseState(&point.x, &point.y);
 
 		while(SDL_PollEvent(&ev)){
+			// TODO: ordenar por prioridade, e computar os eventos
+			// apenas àquele que tem menor prioridade, de entre os
+			// que ocupam o mesmo espaço 
 			for(;it!= G_app.registeredDrawables.end(); it++){
 				SDL_Rect rect;
 				Drawable *s = *it;
