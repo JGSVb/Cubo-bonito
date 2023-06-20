@@ -4,25 +4,29 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <string>
-#include <stdexcept>
+#include <functional>
 #include "graphics.hpp"
 
-class Slider: virtual public Drawable{
+// COR DE FUNDO ALEATÓRIA
+#include <cstdlib>
+#include <ctime>
+
+class Slider: public Drawable{
 	private:
 	SDL_Renderer *renderer;
 	SDL_Texture *labelTexture;
 	SDL_Texture *valueTexture;
 	double actualVal;
 	double defaultVal;
-	double *linkPointer;
 	double minVal;
 	double maxVal;
-	int xPosition;
-	int yPosition;
 	std::string label;
+	std::function<void(double)> valCallback;
 
 	void make_texture(void);
 	void update(void);
+
+	SDL_Color bgColor;
 
 	public:
 	double increment;
@@ -41,7 +45,13 @@ class Slider: virtual public Drawable{
 		labelTexture = NULL;
 		valueTexture = NULL;
 
-		linkPointer = NULL;
+		valCallback = NULL;
+
+		// FUNDO ALEATÓRIO
+		bgColor.r = (double)std::rand() / RAND_MAX * 70 + (255-70);
+		bgColor.g = (double)std::rand() / RAND_MAX * 70 + (255-70);
+		bgColor.b = (double)std::rand() / RAND_MAX * 70 + (255-70);
+		bgColor.a = 255;
 
 		update();
 	}
@@ -69,17 +79,13 @@ class Slider: virtual public Drawable{
 		// necessário, visto alterada a posição
 		update();
 	}
-	void get_position(int &x, int &y){
-		x = xPosition;
-		y = yPosition;
-	}
 
 	void set_value(double val){
 		val = std::max(val, minVal);
 		val = std::min(val, maxVal);
 		actualVal = val;
-		if(linkPointer){
-			*linkPointer = val;
+		if(valCallback){
+			valCallback(val);
 		}
 		// aquando duma alteração no valor, há uma atualização na componente gráfica
 		update();
@@ -94,11 +100,11 @@ class Slider: virtual public Drawable{
 		return increment;
 	}
 
-	void increase(void){
-		set_value(get_value() + increment);
+	void increase(double fac = 1){
+		set_value(get_value() + increment*fac);
 	}
-	void decrease(void){
-		set_value(get_value() - increment);
+	void decrease(double fac = 1){
+		set_value(get_value() - increment*fac);
 	}
 
 	void set_boundries(double min, double max){
@@ -111,14 +117,15 @@ class Slider: virtual public Drawable{
 		min = minVal;
 		max = maxVal;
 	}
-	void link(double *ptr){
-		linkPointer = ptr;
-		*linkPointer = actualVal;
+
+	void set_callback(std::function<void(double)> cb){
+		valCallback = cb;
 	}
-	void unlink(void){
-		linkPointer = NULL;
+	std::function<void(double)> get_callback(void){
+		return valCallback;
 	}
 
+	void get_size(int &w, int &h);
 	void get_label_rect(SDL_Rect &rect);
 	void get_value_rect(SDL_Rect &rect);
 	void get_rect(SDL_Rect &rect);

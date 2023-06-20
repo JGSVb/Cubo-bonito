@@ -3,6 +3,10 @@
 #include <SDL2/SDL_ttf.h>
 #include <stdexcept>
 
+// COR DE FUNDO ALEATÓRIA
+#include <cstdlib>
+#include <ctime>
+
 static constexpr char *FONTPATH {"./font.ttf"};
 static constexpr int FONTSIZE {24};
 static constexpr SDL_Color FONTCOLOR {0,0,0,255};
@@ -18,6 +22,9 @@ void Slider::init(void){
 	G_loaded = true;
 
 	G_font = TTF_OpenFont(FONTPATH, FONTSIZE);
+
+	// COR DE FUNDO ALEATÓRIA
+	std::srand(std::time(nullptr));
 
 }
 
@@ -71,16 +78,24 @@ void Slider::get_value_rect(SDL_Rect &rect){
 	rect.h = 23;
 }
 
-void Slider::get_rect(SDL_Rect &rect){
+void Slider::get_size(int &w, int &h){
 	SDL_Rect labelRect;
 	SDL_Rect valueRect;
 	this->get_label_rect(labelRect);
 	this->get_value_rect(valueRect);
 
+	w = std::max(labelRect.w, valueRect.w);
+	h = labelRect.h + valueRect.h;
+}
+
+void Slider::get_rect(SDL_Rect &rect){
+	int w,h;
+	this->get_size(w,h);
+
 	rect.x = this->xPosition;
 	rect.y = this->yPosition;
-	rect.w = std::max(labelRect.w, valueRect.w);
-	rect.h = labelRect.h + valueRect.h;
+	rect.w = w;
+	rect.h = h;
 }
 
 void Slider::draw(SDL_Renderer *renderer){
@@ -89,7 +104,7 @@ void Slider::draw(SDL_Renderer *renderer){
 	get_value_rect(valueRect);
 	get_label_rect(labelRect);
 
-	SDL_SetRenderDrawColor(renderer, 200,200,255,0);
+	SDL_SetRenderDrawColor(renderer, this->bgColor.r,this->bgColor.g,this->bgColor.b,this->bgColor.a);
 	SDL_RenderFillRect(renderer, &rect);
 
 	SDL_RenderCopy(renderer, this->labelTexture, NULL, &labelRect);
@@ -104,11 +119,20 @@ void Slider::process_event(SDL_Event *ev){
 		return;
 	}
 
+	const Uint8 *state = SDL_GetKeyboardState(NULL);
+	double modifier = 1;
+
+	if(state[SDL_SCANCODE_LSHIFT]){
+		modifier -= (double)4/5;
+	} else if(state[SDL_SCANCODE_LCTRL]){
+		modifier += (double)4/5;
+	}
+
 	if(ev->type == SDL_MOUSEWHEEL){
 		if(ev->wheel.y > 0){
-			this->increase();
+			this->increase(modifier);
 		} else if(ev->wheel.y < 0){
-			this->decrease();
+			this->decrease(modifier);
 		}
 	}
 }

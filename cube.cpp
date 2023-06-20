@@ -8,8 +8,8 @@ void Cube::apply_rotation(void){
 	Vec3 topAxis = (this->topSquare[0] + this->topSquare[2])/2;
 
 	for(int i = 0; i < 4; i++){
-		this->bottomSquare[i] = vec3_rotate(this->bottomSquare[i], this->cubeRotation, bottomAxis);
-		this->topSquare[i] = vec3_rotate(this->topSquare[i], this->cubeRotation, topAxis);
+		this->bottomSquare[i] = vec3_rotate(this->bottomSquare[i], this->cubeRotation + this->rotationAccumulation, bottomAxis);
+		this->topSquare[i] = vec3_rotate(this->topSquare[i], this->cubeRotation + this->rotationAccumulation, topAxis);
 		
 	}
 }
@@ -44,7 +44,15 @@ void Cube::project(void){
 
 }
 
+// TODO: a posição e o tamanho não estão a afetar o desenho
+// como deveriam de acordo com Drawable::get_size e etc...
 void Cube::draw(SDL_Renderer *renderer){
+	if(isAnimated){
+		rotationAccumulation += rotationSpeed;
+		apply_rotation();
+		build();
+	}
+
 	project();
 
 	SDL_SetRenderDrawColor(renderer, 255,0,0,255);

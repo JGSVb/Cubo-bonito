@@ -16,6 +16,10 @@ class Cube: virtual public Drawable {
 	Vec3 viewPoint;
 	Plane viewPlane;
 
+	double rotationSpeed;
+	double rotationAccumulation;
+	bool isAnimated;
+
 	void apply_rotation(void);
 	void build(void);
 	void project(void);
@@ -27,25 +31,29 @@ class Cube: virtual public Drawable {
 		cubeRotation = 0;
 		viewPoint = vPoint;
 		viewPlane = vPlane;
+
+		isAnimated = false;
+		rotationSpeed = 0;
+		rotationAccumulation = 0;
 		build();
 	}
 
-	void set_size(double s){
+	void set_cube_size(double s){
 		cubeSize = s;
 		build();
 	}
 
-	double size(){
+	double get_cube_size(void){
 		return cubeSize;
 	}
-	void set_position(Vec3 p){
+	void set_cube_position(Vec3 p){
 		cubePosition = p;
 		build();
 	}
-	Vec3 position(){
+	Vec3 get_cube_position(){
 		return cubePosition;
 	}
-	double rotation(){
+	double get_rotation(){
 		return cubeRotation;
 	}
 	void set_rotation(double r){
@@ -58,6 +66,15 @@ class Cube: virtual public Drawable {
 	}
 	Plane *get_view_plane_pointer(void){
 		return &viewPlane;
+	}
+
+	void make_animated(double speed){
+		isAnimated = true;
+		rotationSpeed = speed;
+	}
+	void make_unanimated(void){
+		isAnimated = false;
+		rotationAccumulation = 0;
 	}
 
 	void draw(SDL_Renderer *renderer);

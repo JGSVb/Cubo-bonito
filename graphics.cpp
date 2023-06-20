@@ -2,6 +2,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <cmath>
 #include <vector>
+#include <chrono>
 #include "line.hpp"
 #include "plane.hpp"
 #include "graphics.hpp"
@@ -126,22 +127,28 @@ namespace graphics {
 
 	static bool compute_events(void){
 		SDL_Event ev;
-		std::vector<Drawable *>::iterator it = G_app.registeredDrawables.begin();
 		
 		SDL_Point point;
 		SDL_GetMouseState(&point.x, &point.y);
 
 		while(SDL_PollEvent(&ev)){
-			// TODO: ordenar por prioridade, e computar os eventos
-			// apenas àquele que tem menor prioridade, de entre os
-			// que ocupam o mesmo espaço 
-			for(;it!= G_app.registeredDrawables.end(); it++){
+			Drawable *sLowestPriority {NULL};
+
+			std::vector<Drawable *>::iterator it;
+
+			for(it = G_app.registeredDrawables.begin(); it!= G_app.registeredDrawables.end(); it++){
 				SDL_Rect rect;
 				Drawable *s = *it;
 				s->get_rect(rect);
 				if(SDL_PointInRect(&point, &rect)){
-					s->process_event(&ev);
+					if(!sLowestPriority || sLowestPriority->get_priority() > s->get_priority()){
+						sLowestPriority = s;
+					}
 				}
+			}
+
+			if(sLowestPriority){
+				sLowestPriority->process_event(&ev);
 			}
 			
 			switch(ev.type){
@@ -155,9 +162,27 @@ namespace graphics {
 		return true;
 	}
 
+	static inline long int get_time_in_milliseconds(void){
+		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
+		return time.count();
+	}
+
+	static double count_fps(void){
+		static long int frame { 0 };
+		static long int timeStart = get_time_in_milliseconds();
+		frame++;
+
+		long int timeNow = get_time_in_milliseconds();
+		long int timeDiff = timeNow-timeStart;
+		
+		return (double)frame/timeDiff*1000;
+	}
+
 	void main_loop(void){
 
 		std::vector<Drawable *>::iterator it;
+		int frame { 0 };
+		double fps;
 		while(compute_events()){
 			SDL_SetRenderDrawColor(G_app.renderer, 0,0,0,255);
 			SDL_RenderClear(G_app.renderer);
@@ -169,6 +194,12 @@ namespace graphics {
 			}
 			SDL_RenderPresent(G_app.renderer);
 			SDL_Delay(LOOPDELAY);
+
+			fps = count_fps();
+			if((frame++) >= 80){
+				printf("FPS: %f\n", fps);
+				frame = 0;
+			}
 			
 		}
 	}
