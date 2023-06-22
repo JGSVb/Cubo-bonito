@@ -2,6 +2,7 @@
 #include "vec3.hpp"
 #include "cube.hpp"
 #include "graphics.hpp"
+#include "graphics3d.hpp"
 
 void Cube::apply_rotation(void){
 	Vec3 bottomAxis = (this->bottomSquare[0] + this->bottomSquare[2])/2;
@@ -33,11 +34,11 @@ void Cube::project(void){
 		double x1,y1;
 		double x2,y2;
 
-		project_point(this->topSquare[i], this->viewPoint, this->viewPlane, x1, y1);
+		graphics3d::project_point(this->topSquare[i], this->viewPoint, this->viewPlane, x1, y1);
 		this->projTop[i][0] = x1;
 		this->projTop[i][1] = y1;
 
-		project_point(this->bottomSquare[i], this->viewPoint, this->viewPlane, x2, y2);
+		graphics3d::project_point(this->bottomSquare[i], this->viewPoint, this->viewPlane, x2, y2);
 		this->projBottom[i][0] = x2;
 		this->projBottom[i][1] = y2;
 	}
@@ -50,8 +51,8 @@ void Cube::draw(SDL_Renderer *renderer){
 	if(isAnimated){
 		rotationAccumulation += rotationSpeed;
 		apply_rotation();
-		build();
 	}
+	build();
 
 	project();
 

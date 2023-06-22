@@ -12,8 +12,8 @@ typedef enum {
 	POSITION_RIGHT
 } position_relation_t;
 
-void fill_circle(SDL_Renderer *renderer, double x, double y, double rad, double epsilon = 1e-3);
-void project_point(Vec3 point, Vec3 viewPoint, Plane projectionPlane, double& ret_x, double& ret_y);
+void fill_circle(SDL_Renderer *renderer, int x, int y, double rad, double epsilon = 1e-3);
+void fill_triangle(SDL_Renderer *renderer, double x1, double y1, double x2);
 
 class Drawable {
 	private:
@@ -28,7 +28,10 @@ class Drawable {
 	public:
 	Drawable(int p) : priority {p}, xPosition {0}, yPosition {0}, horizontalSize {WINWID}, verticalSize{WINHEI} {}
 	
-	virtual void draw([[ maybe_unused ]]SDL_Renderer *renderer) = 0;
+	virtual void draw([[ maybe_unused ]]SDL_Renderer *renderer){
+		puts("arroz");
+		return;
+	}
 	virtual void process_event([[ maybe_unused ]] SDL_Event *ev){
 		return;
 	}

@@ -2,6 +2,11 @@
 #define PLANE_HPP
 #include "vec3.hpp"
 
+// TODO: ponto baseado nas coordenadas dos planos
+// x do plano e y do plano, mas terá de haver uma reta de referencia, seja ela das
+// abcissas ou das ordenadas (visto estas serem perpendiculares). A partir de uma
+// dessas retas, forma-se um completo referencial cartesiano para, posteriormente,
+// obter os pontos.
 class Plane {
 	public:
 	Vec3 p0;

@@ -3,6 +3,10 @@
 #include <cmath>
 #include <cstdio>
 
+struct Vec3Rot {
+	double pitch, roll, yaw;
+};
+
 class Vec3{
 	public:
 	double e[3];
@@ -58,12 +62,7 @@ inline Vec3 vec3_cross(Vec3 v00, Vec3 v11){
 	     v00.e[0] * v11.e[1] - v00.e[1] * v11.e[0]);
 }
 
-inline Vec3 vec3_rotate(Vec3 v00, double angle, Vec3 axis){
-	double c = cos(angle);
-	double s = sin(angle);
-	v00 = v00-axis;
-	return Vec3(v00.e[0]*c - v00.e[2]*s,
-			v00.e[1],
-			v00.e[0]*s + v00.e[2]*c) + axis;
-}
+[[ deprecated ]] Vec3 vec3_rotate(Vec3 v00, double angle, Vec3 axis);
+Vec3 vec3_rotate(Vec3 v00, struct Vec3Rot *rot, Vec3 axis);
+
 #endif // VEC3_HPP

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <chrono>
+#include <algorithm>
 #include "line.hpp"
 #include "plane.hpp"
 #include "graphics.hpp"
@@ -10,7 +11,7 @@
 
 #define SDL_ERR_EXIT(label) do { fprintf(stderr, "%s: %s\n", label, SDL_GetError()); exit(-1); } while(0)
 
-void fill_circle(SDL_Renderer *renderer, double x, double y, double rad, double epsilon){
+void fill_circle(SDL_Renderer *renderer, int x, int y, double rad, double epsilon){
 	for(double i = 0; i < HALFPI; i+=epsilon){
 		double adj = std::cos(i) * rad;
 		double opp = std::sin(i) * rad;
@@ -22,13 +23,6 @@ void fill_circle(SDL_Renderer *renderer, double x, double y, double rad, double 
 		}
 	}
 	
-}
-
-void project_point(Vec3 point, Vec3 viewPoint, Plane projectionPlane, double& ret_x, double& ret_y){
-	Line l = Line(viewPoint, point-viewPoint);
-	Vec3 ip = l.intersect(projectionPlane);
-	ret_x = ip.x();
-	ret_y = ip.y();
 }
 
 namespace graphics {
@@ -100,17 +94,13 @@ namespace graphics {
 		return G_app.renderer;
 	}
 
+	static bool sort_func(Drawable *s1, Drawable *s2){
+		return s1->get_priority() > s2->get_priority();
+	}
+
 	void register_drawable(Drawable *s){
-		std::vector<Drawable*>::iterator it;
-		for(it = G_app.registeredDrawables.begin(); it != G_app.registeredDrawables.end(); it++){
-			if((*it)->get_priority() <= s->get_priority()){
-				G_app.registeredDrawables.insert(it, s);
-				return; // sai da função, para que possa, posterior-
-					// mente, ser adicionado, conforme escrito
-					// abaixo \/ 
-			}
-		}
-		G_app.registeredDrawables.insert(G_app.registeredDrawables.begin(), s);
+		G_app.registeredDrawables.push_back(s);
+		std::sort(G_app.registeredDrawables.begin(), G_app.registeredDrawables.end(), sort_func);
 	}
 	void unregister_drawable(Drawable *s){
 		std::vector<Drawable*>::iterator it;
@@ -167,15 +157,19 @@ namespace graphics {
 		return time.count();
 	}
 
-	static double count_fps(void){
+	static void timer(double &framerate, long int &cycleDelay){
 		static long int frame { 0 };
 		static long int timeStart = get_time_in_milliseconds();
+		static long int lastTime = timeStart;
 		frame++;
 
 		long int timeNow = get_time_in_milliseconds();
 		long int timeDiff = timeNow-timeStart;
 		
-		return (double)frame/timeDiff*1000;
+		framerate = (double)frame/timeDiff*1000;
+		cycleDelay = timeNow-lastTime;
+
+		lastTime = timeNow;
 	}
 
 	void main_loop(void){
@@ -183,23 +177,29 @@ namespace graphics {
 		std::vector<Drawable *>::iterator it;
 		int frame { 0 };
 		double fps;
-		while(compute_events()){
-			SDL_SetRenderDrawColor(G_app.renderer, 0,0,0,255);
-			SDL_RenderClear(G_app.renderer);
+		long int cycleDelay, cycleExtraTime, tStart;
+		while(true){
+			tStart = get_time_in_milliseconds();
+			if(!compute_events()){
+				break;
+			}
 
 			it = G_app.registeredDrawables.begin();
 			while(it != G_app.registeredDrawables.end()){
 				(*it)->draw(G_app.renderer);
 				it++;
 			}
-			SDL_RenderPresent(G_app.renderer);
-			SDL_Delay(LOOPDELAY);
 
-			fps = count_fps();
-			if((frame++) >= 80){
-				printf("FPS: %f\n", fps);
+			timer(fps, cycleDelay);
+			if((frame++) >= (1.5*fps)){
+				printf("Quadros por segundo:   %f\n", fps);
+				printf("Duração de cada diclo: %ld\n", cycleDelay);
 				frame = 0;
 			}
+			
+			SDL_RenderPresent(G_app.renderer);
+			cycleExtraTime = get_time_in_milliseconds() - tStart;
+			SDL_Delay(std::max((long)0, LOOPDELAY-cycleExtraTime));
 			
 		}
 	}

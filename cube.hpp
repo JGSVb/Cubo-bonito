@@ -4,7 +4,7 @@
 #include "vec3.hpp"
 #include "graphics.hpp"
 
-class Cube: virtual public Drawable {
+class Cube: public Drawable {
 	private:
 	double cubeSize;
 	double cubeRotation;
@@ -75,6 +75,10 @@ class Cube: virtual public Drawable {
 	void make_unanimated(void){
 		isAnimated = false;
 		rotationAccumulation = 0;
+	}
+
+	double get_rotation_speed(void){
+		return rotationSpeed;
 	}
 
 	void draw(SDL_Renderer *renderer);

@@ -8,6 +8,7 @@
 #include "cube.hpp"
 #include "constants.hpp"
 #include "slider.hpp"
+#include "graphics3d.hpp"
 
 class Background: public Drawable {
 	public:
@@ -26,65 +27,78 @@ class Background: public Drawable {
 	}
 };
 
+/*
+class Triangle: public Drawable {
+	private:
+	struct {
+		int pA[2];
+		int pB[2];
+		int pC[2];
+	} triPoints;
+	public:
+	Triangle(int x1, int y1, int x2, int y2, int x3, int y3) : Drawable{100}, triPoints{{x1, y1}, {x2, y2}, {x3, y3}} {}
+	void set_point_a(int x1, int y1){
+		triPoints.pA[0] = x1;
+		triPoints.pA[1] = y1;
+	}
+	void set_point_b(int x1, int y1){
+		triPoints.pC[0] = x1;
+		triPoints.pC[1] = y1;
+	}
+	void set_point_c(int x1, int y1){
+		triPoints.pC[0] = x1;
+		triPoints.pC[1] = y1;
+	}
+
+	void get_rect(SDL_Rect &r){
+		int minX = std::numeric_limits<int>::max();
+		int minY = std::numeric_limits<int>::max();
+		int maxX = std::numeric_limits<int>::lowest();
+		int maxY = std::numeric_limits<int>::lowest();
+
+		// continuar
+		
+		r.x = minX;
+		r.y = minY;
+		r.w = maxX-minX;
+		r.h = maxY-minY;
+
+	}
+
+	void draw(SDL_Renderer *renderer){
+
+	}
+	
+};
+*/
+
 int main([[ maybe_unused ]] int argc, [[ maybe_unused ]] char **argv){
 
 	graphics::init();
 	Slider::init();
-	Vec3 viewPoint{WINWID/2,WINHEI/2,-700};
-	Plane viewPlane{Vec3(0, 0, 0), Vec3(0, 0, 1)};
-	Cube cb{200, Vec3(WINWID/2 - 100, WINHEI/2 - 100, 500), viewPoint, viewPlane};
-	cb.make_animated(0.01);
 
-	Slider s1{graphics::renderer(), "Ponto X"};
+	Slider s1{graphics::renderer(), "Camera X"};
 	s1.set_boundries(-1000, +1000);
-	s1.set_default(viewPoint.e[0]);
-	s1.set_callback([&cb](double x){
-		cb.get_view_point_pointer()->e[0] = x;
-	});
-	
-	Slider s2{graphics::renderer(), "Ponto Y"};
-	s2.set_boundries(-1000, +1000);
-	s2.set_default(viewPoint.e[1]);
-	s2.position_related_to(&s1, POSITION_BELOW);
-	s2.set_callback([&cb](double y){
-		cb.get_view_point_pointer()->e[1] = y;
-	});
 
-	Slider s3{graphics::renderer(), "Ponto Z"};
-	s3.set_boundries(-1000, +1000);
-	s3.set_default(viewPoint.e[2]);
-	s3.position_related_to(&s2, POSITION_BELOW);
-	s3.set_callback([&cb](double z){
-		cb.get_view_point_pointer()->e[2] = z;
-	});
+	Vec3 camPos{0, 0, -1};
+	Vec3 camDir{0,0,1};
+	graphics3d::Camera cam{camPos, camDir, 6, WINWID, WINHEI};
 
-	Slider s4{graphics::renderer(), "Plano Z"};
-	s4.set_boundries(-1000, +1000);
-	s4.set_default(viewPlane.p0.e[2]);
-	s4.position_related_to(&s3, POSITION_RIGHT);
-	s4.set_callback([&cb](double z){
-		cb.get_view_plane_pointer()->p0.e[2] = z;
-	});
+	Vec3 cubePos{.5,.2,100};
+	graphics3d::Cube cube{cubePos, 2, 0.2};
 
-	Slider s5{graphics::renderer(), "Rotacao Cubo"};
-	s5.set_default(0);
-	s5.set_boundries(-DOUBLEPI, +DOUBLEPI);
-	s5.set_increment(0.1);
-	s5.position_related_to(&s2, POSITION_RIGHT);
-	s5.set_callback([&cb](double rad){
-		cb.set_rotation(rad);
-	});
+	cam.add_object(&cube);
+
+	// Triangle test{10, 10, 30, 50, 70, 110};
+
 
 	
 	Background bg{255,255,255};
 
-	graphics::register_drawable(&s1);
-	graphics::register_drawable(&s2);
-	graphics::register_drawable(&s3);
-	graphics::register_drawable(&s4);
-	graphics::register_drawable(&s5);
 	graphics::register_drawable(&bg);
-	graphics::register_drawable(&cb);
+	graphics::register_drawable(&s1);
+	graphics::register_drawable(&cam);
+	// graphics::register_drawable(&test);
 
 	graphics::main_loop();
 
