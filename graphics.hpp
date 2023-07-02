@@ -13,7 +13,7 @@ typedef enum {
 } position_relation_t;
 
 void fill_circle(SDL_Renderer *renderer, int x, int y, double rad, double epsilon = 1e-3);
-void fill_triangle(SDL_Renderer *renderer, double x1, double y1, double x2);
+void fill_triangle(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int x3, int y3);
 
 class Drawable {
 	private:
@@ -29,7 +29,6 @@ class Drawable {
 	Drawable(int p) : priority {p}, xPosition {0}, yPosition {0}, horizontalSize {WINWID}, verticalSize{WINHEI} {}
 	
 	virtual void draw([[ maybe_unused ]]SDL_Renderer *renderer){
-		puts("arroz");
 		return;
 	}
 	virtual void process_event([[ maybe_unused ]] SDL_Event *ev){
@@ -63,7 +62,7 @@ class Drawable {
 		verticalSize = h;
 	}
 
-	virtual void position_related_to(Drawable *obj, position_relation_t pos){
+	virtual void set_position_related_to(Drawable *obj, position_relation_t pos){
 		int w,h,x,y;
 		obj->get_size(w,h);
 		obj->get_position(x,y);
@@ -87,6 +86,23 @@ class Drawable {
 
 	}
 
+};
+
+class Background: public Drawable {
+	public:
+	SDL_Color col;
+	Background(int r, int g, int b, int a = 255): Drawable{1000} {
+		col.r = r;
+		col.g = g;
+		col.b = b;
+		col.a = a;
+	};
+	void draw(SDL_Renderer *renderer){
+		SDL_Rect rect;
+		get_rect(rect);
+		SDL_SetRenderDrawColor(renderer, col.r, col.g, col.b, col.a);
+		SDL_RenderFillRect(renderer, &rect);
+	}
 };
 
 namespace graphics {

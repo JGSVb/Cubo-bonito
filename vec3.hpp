@@ -2,10 +2,27 @@
 #define VEC3_HPP
 #include <cmath>
 #include <cstdio>
+#include "constants.hpp"
 
 struct Vec3Rot {
 	double pitch, roll, yaw;
 };
+
+
+inline double rad_from_degrees(double degrees){
+	return degrees * PI / 180;
+}
+inline double rad_to_degrees(double rad){
+	return rad * 180 / PI;
+}
+
+inline struct Vec3Rot vec3rot_from_degrees(double pitch, double roll, double yaw){
+	return {
+		rad_from_degrees(pitch),
+		rad_from_degrees(roll),
+		rad_from_degrees(yaw)
+	};
+}
 
 class Vec3{
 	public:

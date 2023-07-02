@@ -25,6 +25,42 @@ void fill_circle(SDL_Renderer *renderer, int x, int y, double rad, double epsilo
 	
 }
 
+static double det_2(double x, double y, double x1, double y1){
+	return x*y1 - x1*y;
+}
+
+static bool point_in_triangle(double x, double y, double tx1, double ty1, double tx2, double ty2, double tx3, double ty3){
+	double det1 = det_2(tx2-tx1, ty2-ty1, x-tx1, y-ty1);
+	double det2 = det_2(tx3-tx2, ty3-ty2, x-tx2, y-ty2);
+	double det3 = det_2(tx1-tx3, ty1-ty3, x-tx3, y-ty3);
+	return (det1 >= 0 && det2 >= 0 && det3 >= 0) || (det1 <= 0 && det2 <= 0 && det3 <= 0);
+}
+
+void fill_triangle(SDL_Renderer *renderer, int x1, int y1, int x2, int y2, int x3, int y3){
+	int xMax, xMin, yMax, yMin;
+
+	xMax = std::max(x1, x2);
+	xMax = std::max(xMax, x3);
+
+	xMin = std::min(x1, x2);
+	xMin = std::min(xMin, x3);
+
+	yMax = std::max(y1, y2);
+	yMax = std::max(yMax, y3);
+
+	yMin = std::min(y1, y2);
+	yMin = std::min(yMin, y3);
+
+	for(int j = yMin; j <= yMax; j++){
+		for(int i = xMin; i <= xMax; i++){
+			if(point_in_triangle(i,j,x1,y1,x2,y2,x3,y3)){
+				SDL_RenderDrawPoint(renderer, i,j);
+			}
+		}
+	}
+
+}
+
 namespace graphics {
 	static struct {
 		bool initLock = false;

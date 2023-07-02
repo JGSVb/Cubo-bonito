@@ -27,7 +27,7 @@ void Object::apply_rotation(void){
 	int i = 0;
 	Vec3 axis = this->objVertices[0];
 	for(Vec3 p: this->objVertices){
-		p = vec3_rotate(p, this->objRotation, axis);
+		p = vec3_rotate(p, &this->objRotation, axis);
 		this->objVertices[i] = p;
 		i += 1;
 	}
@@ -102,7 +102,41 @@ void Cube::make_edges(void){
 	this->objEdges.push_back(edgeDiagonal[1]);
 }
 
+// TODO
 void Cube::make_triangles(void){
+
+	int baseTriangle[3];
+	for(int i = 0; i < 2; i++){
+		baseTriangle[0] = 0;
+		baseTriangle[1] = 1 + i;
+		baseTriangle[2] = 2 + i;
+		this->objTriangles.push_back(baseTriangle[0]);
+		this->objTriangles.push_back(baseTriangle[1]);
+		this->objTriangles.push_back(baseTriangle[2]);
+
+		baseTriangle[0] = 4;
+		baseTriangle[1] = 5 + i;
+		baseTriangle[2] = 6 + i;
+		this->objTriangles.push_back(baseTriangle[0]);
+		this->objTriangles.push_back(baseTriangle[1]);
+		this->objTriangles.push_back(baseTriangle[2]);
+	}
+
+	int sideTriangle[3];
+
+	for(int i = 0; i < 4; i++){
+		sideTriangle[0] = i;
+		sideTriangle[2] = i%4;
+		sideTriangle[3] = ((i+1)%4) + 4;
+		this->objTriangles.push_back(sideTriangle[0]);
+		this->objTriangles.push_back(sideTriangle[1]);
+		this->objTriangles.push_back(sideTriangle[2]);
+
+		sideTriangle[2] = i+4;
+		this->objTriangles.push_back(sideTriangle[0]);
+		this->objTriangles.push_back(sideTriangle[1]);
+		this->objTriangles.push_back(sideTriangle[2]);
+	}
 
 }
 

@@ -18,7 +18,7 @@ namespace graphics3d {
 		std::vector<int> objTriangles; // a1, b1, c1, a2, b2, c2, an, bn, cn -> Triangulo ABC.
 		Vec3 objPos;
 		double objScale;
-		double objRotation;
+		struct Vec3Rot objRotation;
 
 		virtual void make_vertices(void)=0;
 		virtual void make_edges(void)=0;
@@ -29,7 +29,24 @@ namespace graphics3d {
 		virtual void build(void);
 
 		public:
-		Object(Vec3 pos, double scale, double rotation):  objVertices{}, objEdges{}, objTriangles{}, objPos{pos}, objScale{scale}, objRotation{rotation} {}
+		Object(Vec3 pos, double scale, struct Vec3Rot rotation):  objVertices{}, objEdges{}, objTriangles{}, objPos{pos}, objScale{scale}, objRotation{rotation} {}
+		virtual void set_rotation(struct Vec3Rot rotation){
+			objRotation = rotation;
+		}
+		virtual void get_rotation(struct Vec3Rot &ret){
+			ret.pitch = objRotation.pitch;
+			ret.yaw = objRotation.yaw;
+			ret.roll = objRotation.roll;
+		}
+
+		virtual void set_position(double x, double y, double z){
+			objPos = Vec3(x,y,z);
+		}
+		virtual void get_position(double &x, double &y, double &z){
+			x = objPos.x();
+			y = objPos.y();
+			z = objPos.z();
+		}
 		
 	};
 
@@ -61,6 +78,17 @@ namespace graphics3d {
 		void draw(SDL_Renderer *renderer);
 		void build_all(void);
 		void project(void);
+
+		void set_camera_position(double x, double y, double z){
+			cameraPosition.e[0] = x;
+			cameraPosition.e[1] = y;
+			cameraPosition.e[2] = z;
+		}
+		void get_camera_position(double &x, double &y, double &z){
+			x = cameraPosition.e[0];
+			y = cameraPosition.e[1];
+			z = cameraPosition.e[2];
+		}
 		
 	};
 
@@ -70,7 +98,7 @@ namespace graphics3d {
 		void make_edges(void);
 		void make_triangles(void);
 		public:
-		Cube(Vec3 position, double size, double rotation): Object{position, size, rotation} {}
+		Cube(Vec3 position, double size, struct Vec3Rot rotation): Object{position, size, rotation} {}
 		
 	};
 
